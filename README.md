@@ -1,6 +1,4 @@
-# Creating a README file with the given content.
 
-readme_content = """
 # Twitter Clone
 
 This is my first project utilizing the MERN stack (MongoDB, Express, React, Node.js). It is a Twitter clone where users can post tweets, follow others, and see tweets from their followers, mimicking the basic functionality of Twitter.
@@ -22,15 +20,3 @@ This is my first project utilizing the MERN stack (MongoDB, Express, React, Node
 
 This project was inspired by the tutorial from [YouTube](https://www.youtube.com/watch?v=4GUVz2psWUg). A special thanks to the creator for providing an excellent step-by-step guide on how to build a Twitter clone using the MERN stack.
 
-## License
-
-This project is open-source and available under the MIT License.
-"""
-
-# Saving the content to a README.md file
-readme_file_path = "/mnt/data/Twitter_Clone_README.md"
-
-with open(readme_file_path, "w") as file:
-    file.write(readme_content)
-
-readme_file_path
