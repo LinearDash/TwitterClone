@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 
-const userSchema = new mongoose.schema({
+const userSchema = new mongoose.Schema({
   username:{
     type: String,
     require: true,
@@ -22,12 +22,12 @@ const userSchema = new mongoose.schema({
 
   },
   followers:[{
-    type: mongoose.schema.Types.ObjectId,//Idk what the hell is this type
+    type: mongoose.Schema.Types.ObjectId,//Idk what the hell is this type
     ref:"User",
     default:[]
   }],
   following:[{
-    type: mongoose.schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref:"User",
     default:[]
   }],
