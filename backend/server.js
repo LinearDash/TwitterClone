@@ -1,5 +1,6 @@
 
 import express from "express";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.routes.js"
@@ -10,7 +11,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT
 
-app.use(express.json());//middleware apparently
+//this is to convert the request into readable format
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use("/api/auth",authRoutes)
 
