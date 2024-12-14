@@ -1,60 +1,66 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
-export const signup = async (req,res)=>
-  {
-  try {
-    const {fullName,username,email,password}=req.body;
+export const signup = async (req, res) => {
+	try {
+		const { fullName, username, email, password } = req.body;
 
-    const emailRegex =/^[^\s@]+@[^\s@]+\.[^\s@]+$/;// absoluty no clue what this is 
-      if(!emailRegex.test(email)){
-        return res.status(400).json({error:"Invalid email format"})
-      }
+    console.log("fullName:", fullName);
+    console.log("username:", username);
+    console.log("email:", email);
+    console.log("password:", password);
 
-    const existingUser = await User.findOne({username})//checks if the given username already exists or not
-      if(existingUser){
-        return res.status(400).json({error:"Username is already taken"});
-      }
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			return res.status(400).json({ error: "Invalid email format" });
+		}
 
-    const existingEmail = await User.findOne({email})//checks if the given email already exists or not
-      if(existingEmail){
-        return res.status(400).json({error:"Email is already taken"});
-      }
-    const salt = await bcrypt.genSalt(10)
-    const hassedPassword= await bcrypt.hash(password,salt)
-    const newUser =new User({
-      fullName,
-      username,
-      email,
-      password:hassedPassword
-    })
-      
-    if(newUser){
-      generateTokenAndSetCookie(newUser._id,res )// yet to write this function
-      await newUser.save()
+		const existingUser = await User.findOne({ username });
+		if (existingUser) {
+			return res.status(400).json({ error: "Username is already taken" });
+		}
 
-      res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        username: newUser.username,
-        email: newUser.email,
-        followers: newUser.followers,
-        following: newUser.following,
-        profileImg: newUser.profileImg,
-        coverImg:newUser.coverImg
-      })
-    }
-    else{
-      res.status(400).json({error:"Invalid user data"})// if the date given is invalid
-      
-    }
-  } catch (error) {
-    console.log("error in signup controller");
-    
-    res.status(500).json({error:"Internal Server error "})
-  }
-}
+		const existingEmail = await User.findOne({ email });
+		if (existingEmail) {
+			return res.status(400).json({ error: "Email is already taken" });
+		}
 
+		if (password.length < 6) {
+			return res.status(400).json({ error: "Password must be at least 6 characters long" });
+		}
+
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(password, salt);
+
+		const newUser = new User({
+			fullName,
+			username,
+			email,
+			password: hashedPassword,
+		});
+
+		if (newUser) {
+			generateTokenAndSetCookie(newUser._id, res);
+			await newUser.save();
+
+			res.status(201).json({
+				_id: newUser._id,
+				fullName: newUser.fullName,
+				username: newUser.username,
+				email: newUser.email,
+				followers: newUser.followers,
+				following: newUser.following,
+				profileImg: newUser.profileImg,
+				coverImg: newUser.coverImg,
+			});
+		} else {
+			res.status(400).json({ error: "Invalid user data" });
+		}
+	} catch (error) {
+		console.log("Error in signup controller", error.message);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+};
 export const login = async (req,res)=>
   {
   res.json({
