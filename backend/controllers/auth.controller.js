@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../lib/utils/generateToken.js";
+import { json } from "express";
 
 export const signup = async (req, res) => {
 	try {
@@ -121,8 +122,11 @@ export const logout = async (req,res)=>
 
 export const getMe= async (req,res)=>{
   try {
+		const user = await User.findById(res.user._id).select("-password")
+		res.status(200),json(user);
     
   } catch (error) {
-    
+		console.log("Error in getMe controller", error.message);
+		res.status(500).json({ error: "Internal Server Error" });
   }
 }
