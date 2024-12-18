@@ -20,15 +20,14 @@ export const getUserProfile = async (req, res) => {
 export const followUnfollowUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const userToMOdify = await User.findById(id);
-    const currentUser = await User.findById(req.user._id);
-
-    console.log("In followUnfollowUser");
+    console.log("In followUnfollowUser", id, req.user._id);
 
     //Checks if the current User and the userToModify are same
-    if (id === req.user._id) {
+    if (id === req.user._id.toString()) {
       return res.status(400).json({ error: "You can not follow yourself" });
     }
+    const userToMOdify = await User.findById(id);
+    const currentUser = req.user;
 
     // Check for User. if the currentUser or the userToModify exists or not
     if (!userToMOdify || !currentUser) {
