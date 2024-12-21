@@ -21,7 +21,7 @@ export const getUserProfile = async (req, res) => {
 export const followUnfollowUser = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("In followUnfollowUser", id, req.user._id);
+    // console.log("In followUnfollowUser", id, req.user._id);
 
     //Checks if the current User and the userToModify are same
     if (id === req.user._id.toString()) {
