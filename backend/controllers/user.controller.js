@@ -1,6 +1,9 @@
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 
+import bcrypt from "bcryptjs";
+import { v2 as cloudinary } from "cloudinary";
+
 export const getUserProfile = async (req, res) => {
   const { username } = req.params;
   //gets username form thr paramater ie the url
@@ -90,6 +93,82 @@ export const getSuggestedUsers = async (req, res) => {
     res.status(200).json(suggestedUsers);
   } catch (error) {
     console.log(`Error in getSuggestedUsers: ${error.message}`);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const { fullname, username, email, currentPassword, newPassword, bio, link } =
+    req.body;
+
+  let { profileImg, coverImg } = req.body;
+  const userId = req.user._id;
+
+  try {
+    const user = await User.findById(userId);
+
+    //If user not found
+    if (!user) return res.status(404).json({ message: "User Not Found" });
+
+    //Check for any empty input for passowrd change
+    if (
+      (!currentPassword && newPassword) ||
+      (!newPassword && currentPassword)
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Provide Both current password and new password" });
+    }
+
+    if (currentPassword && newPassword) {
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+      if (!isMatch) {
+        return res.status(400).json({ message: "Current Password invalid " });
+      }
+      if (newPassword < 6) {
+        return res
+          .status(400)
+          .json({ message: "New password must be at least 6 characters long" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+    if (profileImg) {
+      if (user.profileImg) {
+        //this splits the url to get the imageid
+        await cloudinary.uploader.destroy(
+          user.profileImg.split("/").pop().split(".")[0]
+        );
+      }
+      const uplodedResponse = await cloudinary.uploader.upload(profilrImg);
+      profileImg = uplodedResponse.secure_url;
+    }
+    if (coverImg) {
+      if (user.coverImg) {
+        //this splits the url to get the imageid
+        await cloudinary.uploader.destroy(
+          user.coverImg.split("/").pop().split(".")[0]
+        );
+      }
+      const uplodedResponse = await cloudinary.uploader.upload(coverImg);
+      coverImg = uplodedResponse.secure_url;
+    }
+    user.fullName = fullname || user.fullName;
+    user.username = username || user.username;
+    user.email = email || user.email;
+    user.bio = bio || user.bio;
+    user.link = link || user.link;
+    user.profileImg = profileImg || user.profileImg;
+    user.coverImg = coverImg || user.coverImg;
+
+    await user.save();
+
+    user.password = null;
+
+    res.status(200).json({ message: "User updated successfully", user });
+  } catch (error) {
+    console.log(`Error in updateUser: ${error.message}`);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
