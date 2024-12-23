@@ -85,3 +85,9 @@ export const commentOnPost = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const likeUnlikePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+  } catch (error) {}
+};
