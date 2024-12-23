@@ -104,11 +104,22 @@ export const updateUser = async (req, res) => {
   let { profileImg, coverImg } = req.body;
   const userId = req.user._id;
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   try {
     const user = await User.findById(userId);
 
     //If user not found
     if (!user) return res.status(404).json({ message: "User Not Found" });
+
+    //Test if the email is in correct format
+    if (email) {
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      } else {
+        user.email = email || user.email;
+      }
+    }
 
     //Check for any empty input for passowrd change
     if (
@@ -156,7 +167,6 @@ export const updateUser = async (req, res) => {
     }
     user.fullName = fullname || user.fullName;
     user.username = username || user.username;
-    user.email = email || user.email;
     user.bio = bio || user.bio;
     user.link = link || user.link;
     user.profileImg = profileImg || user.profileImg;
