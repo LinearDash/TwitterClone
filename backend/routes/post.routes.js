@@ -5,6 +5,7 @@ import {
   createPost,
   deletePost,
   getAllPosts,
+  getFollowingPosts,
   getLikedPosts,
   likeUnlikePost,
 } from "../controllers/post.controller.js";
@@ -12,6 +13,8 @@ import {
 const router = express.Router();
 
 router.get("/all", protectRoute, getAllPosts);
+
+router.get("/following", protectRoute, getFollowingPosts);
 
 router.get("/liked/:id", protectRoute, getLikedPosts);
 

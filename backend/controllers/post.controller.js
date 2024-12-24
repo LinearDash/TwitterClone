@@ -173,3 +173,30 @@ export const getLikedPosts = async (req, res) => {
     res.status(200).json(likedPosts);
   } catch (error) {}
 };
+
+export const getFollowingPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User Not Found" });
+
+    //list of following user
+    const following = user.following;
+
+    //get all the post from the following user
+    const followingPosts = await Post.find({ user: { $in: following } })
+      .sort({
+        //sorting out latest to oldest by creat date
+        createdAt: -1,
+      })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+
+    res.status(200).json(followingPosts);
+  } catch (error) {}
+};
