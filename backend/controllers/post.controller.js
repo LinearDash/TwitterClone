@@ -89,5 +89,25 @@ export const commentOnPost = async (req, res) => {
 export const likeUnlikePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-  } catch (error) {}
+    const userId = req.user._id;
+
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const userLikedPost = post.likes.includes(userId);
+
+    if (userLikedPost) {
+      // Unlike the Post
+      post.likes.pull(userId);
+      await post.save();
+      return res.status(200).json({ message: "Post Unliked" });
+    } else {
+      // Like the post
+      post.likes.push(userId);
+      await post.save();
+      return res.status(200).json({ message: "Post Liked" });
+    }
+  } catch (error) {
+    console.error("Error liking/unliking post:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
