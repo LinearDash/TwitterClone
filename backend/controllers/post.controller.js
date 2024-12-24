@@ -179,11 +179,38 @@ export const getFollowingPosts = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ error: "User Not Found" });
 
-    //list of following user
+    // List of following users
     const following = user.following;
 
-    //get all the post from the following user
+    // Get all the posts from the following users
     const followingPosts = await Post.find({ user: { $in: following } })
+      .sort({
+        // Sorting from latest to oldest by creation date
+        createdAt: -1,
+      })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+
+    res.status(200).json(followingPosts);
+  } catch (error) {
+    console.error("Error fetching following posts:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserPosts = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User Not Found" });
+
+    const posts = await Post.find({ user: user._id })
       .sort({
         //sorting out latest to oldest by creat date
         createdAt: -1,
@@ -197,6 +224,9 @@ export const getFollowingPosts = async (req, res) => {
         select: "-password",
       });
 
-    res.status(200).json(followingPosts);
-  } catch (error) {}
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
