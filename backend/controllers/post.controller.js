@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Post from "../models/post.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import Notification from "../models/notification.model.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -68,8 +69,10 @@ export const commentOnPost = async (req, res) => {
     const { text } = req.body;
     const userId = req.user._id;
 
+    // Check if the post exists
     if (!post) return res.status(404).json({ message: "Post not found" });
 
+    // Check if the input exists
     if (!text) {
       return res.status(400).json({ message: "Comment can't be empty" });
     }
@@ -90,6 +93,7 @@ export const likeUnlikePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     const userId = req.user._id;
+    const user = await User.findById(userId);
 
     if (!post) return res.status(404).json({ error: "Post not found" });
 
@@ -98,16 +102,74 @@ export const likeUnlikePost = async (req, res) => {
     if (userLikedPost) {
       // Unlike the Post
       post.likes.pull(userId);
+      await user.likedPost.pull(req.params.id);
+
       await post.save();
+      await user.save();
       return res.status(200).json({ message: "Post Unliked" });
     } else {
       // Like the post
       post.likes.push(userId);
+      await user.likedPost.addToSet(req.params.id);
+
+      //creating a new notification
+      const newNotification = new Notification({
+        type: "like",
+        from: req.user._id,
+        to: post.user,
+      });
+
+      await newNotification.save();
       await post.save();
+      await user.save();
       return res.status(200).json({ message: "Post Liked" });
     }
   } catch (error) {
     console.error("Error liking/unliking post:", error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+
+    if (posts.length === 0) return res.status(200).json([]);
+
+    res.status(200).json(posts);
+  } catch (error) {}
+};
+
+export const getLikedPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    // console.log(user);
+    if (!user) return res.status(404).json({ error: "User Not Found" });
+
+    // gets all the likedpost from the user poulating Users
+    const likedPosts = await Post.find({
+      _id: { $in: user.likedPost },
+    })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        // for comments
+        path: "comments.user",
+        select: "-password",
+      });
+
+    // returns Liked posts
+    res.status(200).json(likedPosts);
+  } catch (error) {}
 };
