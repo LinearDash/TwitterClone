@@ -1,7 +1,7 @@
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
 
-export const getNotifications = async (req, res) => {
+export const getAllNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
 
@@ -25,7 +25,7 @@ export const getNotifications = async (req, res) => {
   }
 };
 
-export const deleteNotifications = async (req, res) => {
+export const deleteAllNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
 
@@ -39,4 +39,28 @@ export const deleteNotifications = async (req, res) => {
     console.error("Error deleting notifications:", error);
     res.status(500).json({ message: "Failed to delete notifications" });
   }
+};
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const notification = await Notification.findById(id);
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification Not found" });
+    }
+    console.log(userId.toString());
+    console.log(notification.to.toString());
+
+    if (userId.toString() === notification.to.toString()) {
+      await Notification.findByIdAndDelete(id);
+      res.status(200).json({ message: "Notification deleted successfully" });
+    } else {
+      res
+        .status(200)
+        .json({ message: "Notification Can't be deleted by anotherUSser" });
+    }
+  } catch (error) {}
 };
