@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import Toaster from "react-hot-toast";
 import "./App.css";
 import HomePage from "./pages/Home/HomePage";
 import SignUpPage from "./pages/auth/signup/SignUpPage";
@@ -20,6 +21,7 @@ function App() {
         <Route path="/profile/:username" element={<ProfilePage />} />
       </Routes>
       <RightPannel />
+      <Toaster />
     </div>
   );
 }
