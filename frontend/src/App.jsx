@@ -67,6 +67,7 @@ function App() {
         />
       </Routes>
       {authUser && <RightPannel />}
+
       <Toaster />
     </div>
   );
