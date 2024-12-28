@@ -102,6 +102,7 @@ export const login = async (req, res) => {
       profileImg: user.profileImg,
       coverImg: user.coverImg,
     });
+    console.log("Logged in sucessfully");
   } catch (error) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });

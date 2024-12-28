@@ -5,11 +5,10 @@ import XSvg from "../../../components/svgs/x";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
-import { useMutation } from "@tanstack/react-query";
-import Post from "../../../components/common/Post";
-import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const LoginPage = () => {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -18,7 +17,7 @@ const LoginPage = () => {
   const {
     mutate: login,
     isError,
-    isPending,
+    isLoading,
     error,
   } = useMutation({
     mutationFn: async ({ username, password }) => {
@@ -41,7 +40,8 @@ const LoginPage = () => {
       }
     },
     onSuccess: () => {
-      toast.success("Logged in Sucessfully");
+      //refetch authUser to reload UI
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
   });
 
@@ -87,7 +87,7 @@ const LoginPage = () => {
             />
           </label>
           <button className="btn rounded-full btn-primary text-white">
-            {isPending ? "Loading..." : "Login"}
+            {isLoading ? "Loading..." : "Login"}
           </button>
           {isError && <p className="text-red-500">{error.message}</p>}
         </form>
