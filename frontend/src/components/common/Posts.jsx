@@ -3,7 +3,7 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType }) => {
+const Posts = ({ feedType, username, userId }) => {
   // const isLoading = false;
 
   // To see which feed Type user is on and select a endpoint in the basis of that
@@ -13,6 +13,10 @@ const Posts = ({ feedType }) => {
         return "/api/post/all";
       case "following":
         return "/api/post/following";
+      case "posts":
+        return `/api/post/user/${username}`;
+      case "liked":
+        return `/api/post/liked/${userId}`;
       default:
         return "/api/post/all";
     }
@@ -45,7 +49,7 @@ const Posts = ({ feedType }) => {
 
   useEffect(() => {
     refetch();
-  }, [feedType, refetch]);
+  }, [feedType, refetch, username, userId]);
   return (
     <>
       {/* If the posts are loading or refetching this wil show a skeleton */}
