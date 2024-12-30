@@ -98,7 +98,7 @@ export const getSuggestedUsers = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const { fullname, username, email, currentPassword, newPassword, bio, link } =
+  const { fullName, username, email, currentPassword, newPassword, bio, link } =
     req.body;
 
   let { profileImg, coverImg } = req.body;
@@ -152,7 +152,7 @@ export const updateUser = async (req, res) => {
           user.profileImg.split("/").pop().split(".")[0]
         );
       }
-      const uplodedResponse = await cloudinary.uploader.upload(profilrImg);
+      const uplodedResponse = await cloudinary.uploader.upload(profileImg);
       profileImg = uplodedResponse.secure_url;
     }
     if (coverImg) {
@@ -165,7 +165,7 @@ export const updateUser = async (req, res) => {
       const uplodedResponse = await cloudinary.uploader.upload(coverImg);
       coverImg = uplodedResponse.secure_url;
     }
-    user.fullName = fullname || user.fullName;
+    user.fullName = fullName || user.fullName;
     user.username = username || user.username;
     user.bio = bio || user.bio;
     user.link = link || user.link;

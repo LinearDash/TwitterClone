@@ -1,9 +1,11 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 const EditProfileModal = () => {
   const [formData, setFormData] = useState({
     fullName: "",
-    username: "",
+    // username: "", this is crashing the server coz the URL has username in it
+    //will change later
     email: "",
     bio: "",
     link: "",
@@ -11,6 +13,36 @@ const EditProfileModal = () => {
     currentPassword: "",
   });
 
+  const queryClient = useQueryClient();
+
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+    mutationFn: async () => {
+      try {
+        console.log(formData);
+        const res = await fetch("/api/users/update", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Something went worng");
+        }
+        console.log(data);
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: () => {
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+      ]);
+    },
+  });
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -32,7 +64,7 @@ const EditProfileModal = () => {
             className="flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Profile updated successfully");
+              updateProfile();
             }}
           >
             <div className="flex flex-wrap gap-2">
@@ -44,14 +76,14 @@ const EditProfileModal = () => {
                 name="fullName"
                 onChange={handleInputChange}
               />
-              <input
+              {/* <input
                 type="text"
                 placeholder="Username"
                 className="flex-1 input border border-gray-700 rounded p-2 input-md"
                 value={formData.username}
                 name="username"
                 onChange={handleInputChange}
-              />
+              />  will change later*/}
             </div>
             <div className="flex flex-wrap gap-2">
               <input
@@ -97,7 +129,7 @@ const EditProfileModal = () => {
               onChange={handleInputChange}
             />
             <button className="btn btn-primary rounded-full btn-sm text-white">
-              Update
+              {isUpdatingProfile ? "Updating..." : "Update"}
             </button>
           </form>
         </div>
